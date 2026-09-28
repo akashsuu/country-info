@@ -174,6 +174,17 @@ if(e?.events?.length){
   `;
  }
 
+let satellite="NASA satellite imagery unavailable.";
+if(lat&&lon){
+ const satelliteURL=`https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?service=WMS&request=GetMap&version=1.3.0&layers=MODIS_Terra_CorrectedReflectance_TrueColor&styles=&format=image/jpeg&transparent=false&width=1000&height=650&crs=CRS:84&bbox=${lon-5},${lat-5},${lon+5},${lat+5}`;
+ satellite=`
+  <h3>NASA Satellite View</h3>
+  <img class="satellite-image" src="${satelliteURL}" alt="NASA satellite imagery of ${c.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+  <p style="display:none">NASA satellite image is currently unavailable.</p>
+  <p>Satellite imagery centered on ${c.title}.</p>
+ `;
+}
+
  result.innerHTML=`
  <article>
   <header>
@@ -224,6 +235,9 @@ if(e?.events?.length){
    `<img class="country-image" src="${image}">`
    :"<p>No image available.</p>"
   }
+  <hr>
+  <h2>NASA Satellite Imagery</h2>
+  ${satellite}
   <hr>
   <h2>NASA Space</h2>
   ${nasa}

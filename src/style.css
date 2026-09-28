@@ -193,6 +193,16 @@ strong{
 color:#fff;
 }
 
+.satellite-image{
+width:100%;
+height:auto;
+max-height:650px;
+object-fit:contain;
+display:block;
+border:1px solid #444;
+background:#0b0e16;
+}
+
 @media(max-width:650px){
 
 #app{
