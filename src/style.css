@@ -203,6 +203,24 @@ border:1px solid #444;
 background:#0b0e16;
 }
 
+.event{
+padding:15px;
+margin:10px 0;
+border:1px solid #333;
+border-left:4px solid #fff;
+background:#0b0e16;
+color:#ddd;
+}
+
+.event b{
+color:#fff;
+font-size:16px;
+}
+
+.event br+*{
+color:#999;
+}
+
 @media(max-width:650px){
 
 #app{

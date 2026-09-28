@@ -116,40 +116,57 @@ function show(c,w,n,e,lat,lon){
   `;
  }
 
-let events="No active NASA events found for this country."; 
-if(e?.events?.length){ 
- const country=c.title.toLowerCase(); 
- const aliases={ 
-  "united states":["united states","usa","us"], 
-  "united kingdom":["united kingdom","uk"], 
-  "russia":["russia","russian federation"], 
-  "south korea":["south korea","republic of korea"], 
-  "north korea":["north korea","democratic people's republic of korea"], 
-  "myanmar":["myanmar","burma"], 
-  "iran":["iran","islamic republic of iran"], 
-  "vietnam":["vietnam"], 
-  "laos":["laos"], 
-  "bolivia":["bolivia","plurinational state of bolivia"], 
-  "tanzania":["tanzania","united republic of tanzania"], 
-  "venezuela":["venezuela","bolivarian republic of venezuela"] 
- }; 
- 
- const names=aliases[country]||[country]; 
- 
- const nearby=e.events.filter(x=>{ 
-  const text=((x.title||"")+" "+(x.description||"")).toLowerCase(); 
-  return names.some(name=>text.includes(name)); 
- }).slice(0,10); 
- 
- if(nearby.length){ 
-  events=nearby.map(x=>` 
-   <div class="event"> 
-    <b>${x.title}</b> 
-    <br> 
-    ${x.categories?.[0]?.title||"Natural event"} 
-   </div> 
-  `).join(""); 
- } 
+let events="No live events found for this country.";
+if(e?.events?.length&&lat&&lon){
+ const types=[
+  "Wildfires",
+  "Severe Storms",
+  "Earthquakes",
+  "Volcanoes",
+  "Floods",
+  "Sea and Lake Ice",
+  "Landslides",
+  "Dust and Haze"
+ ];
+
+ const found=[];
+
+ for(const type of types){
+  const match=e.events.find(x=>{
+   const category=x.categories?.[0]?.title||"";
+   const g=x.geometry?.[x.geometry.length-1];
+   if(!g||g.type!=="Point"||!g.coordinates)return false;
+   if(category!==type)return false;
+   return distance(lat,lon,g.coordinates[1],g.coordinates[0])<=1800;
+  });
+
+  if(match)found.push(match);
+
+  if(found.length>=6)break;
+ }
+
+ if(found.length){
+  events=found.map(x=>{
+   const category=x.categories?.[0]?.title||"Live Event";
+   let icon="";
+
+   if(category==="Wildfires");
+   else if(category==="Severe Storms");
+   else if(category==="Earthquakes");
+   else if(category==="Volcanoes");
+   else if(category==="Floods");
+   else if(category==="Landslides");
+   else if(category==="Dust and Haze");
+
+   return`
+   <div class="event">
+    <b>${icon} ${x.title}</b>
+    <br>
+    ${category}
+   </div>
+   `;
+  }).join("");
+ }
 }
 
  let nasa="NASA images unavailable.";
@@ -227,7 +244,7 @@ if(lat&&lon){
    ${forecast}
   </table>
   <hr>
-  <h2>Natural Disasters & Events</h2>
+  <h2>Live Events</h2>
   ${events}
   <hr>
   <h2>Country Images</h2>
