@@ -1,12 +1,69 @@
 # Country Explorer
 
-A simple country explorer made with Vite and vanilla JavaScript.
+Country Explorer is a web project where you can search for a country and explore its information, weather, live events, and NASA imagery.
 
-Search for a country to see basic country information.
-It shows country details like the flag, population, capital, languages, currency, geography, and location. I also added weather and a 7-day forecast, along with information about active natural disasters and events.
+## Main Features
 
-## Run
+* Country Information
+* Climate & Weather
+* 7 Day Forecast
+* Live Events
+* NASA space and satellite imagery
+* Country images and details
 
-1. Put your NASA API key in `.env`.
-2. Run `npm install`.
-3. Run `npm run dev`.
+## Preview
+
+### Search
+
+![Search](preview/search.png)
+
+### Country Information
+
+![Country Information](preview/detail.png)
+
+### Climate & Weather
+
+![Climate & Weather](preview/climate.png)
+
+### 7 Day Forecast
+
+![7 Day Forecast](preview/forecast.png)
+
+### Live Events
+
+![Live Events](preview/events.png)
+
+## APIs
+
+* Wikipedia API
+* Open-Meteo API
+* NASA APIs
+* NASA EONET
+* NASA Images API
+
+## Technologies
+
+* HTML
+* CSS
+* JavaScript
+* Vite
+
+## Setup
+
+```bash
+npm install
+```
+
+Create a `.env` file:
+
+```env
+VITE_NASA_API_KEY=your_nasa_api_key
+```
+
+Run the project:
+
+```bash
+npm run dev
+```
+
+Then open the local URL provided by Vite.
