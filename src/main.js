@@ -57,6 +57,16 @@ async function search(){
   `;
  }
 }
+function distance(lat1,lon1,lat2,lon2){
+ const R=6371;
+ const dLat=(lat2-lat1)*Math.PI/180;
+ const dLon=(lon2-lon1)*Math.PI/180;
+ const a=Math.sin(dLat/2)**2+
+ Math.cos(lat1*Math.PI/180)*
+ Math.cos(lat2*Math.PI/180)*
+ Math.sin(dLon/2)**2;
+ return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
 
 function show(c,w,n,e,lat,lon){
  const image=c.thumbnail?.source||"";
@@ -106,17 +116,41 @@ function show(c,w,n,e,lat,lon){
   `;
  }
 
- let events="No active NASA events available.";
- if(e?.events?.length){
-  events=e.events.slice(0,10).map(x=>`
-   <div class="event">
-    <b>${x.title}</b>
-    <br>
-    ${x.categories?.[0]?.title||"Natural event"}
-   </div>
-  `).join("");
-
- }
+let events="No active NASA events found for this country."; 
+if(e?.events?.length){ 
+ const country=c.title.toLowerCase(); 
+ const aliases={ 
+  "united states":["united states","usa","us"], 
+  "united kingdom":["united kingdom","uk"], 
+  "russia":["russia","russian federation"], 
+  "south korea":["south korea","republic of korea"], 
+  "north korea":["north korea","democratic people's republic of korea"], 
+  "myanmar":["myanmar","burma"], 
+  "iran":["iran","islamic republic of iran"], 
+  "vietnam":["vietnam"], 
+  "laos":["laos"], 
+  "bolivia":["bolivia","plurinational state of bolivia"], 
+  "tanzania":["tanzania","united republic of tanzania"], 
+  "venezuela":["venezuela","bolivarian republic of venezuela"] 
+ }; 
+ 
+ const names=aliases[country]||[country]; 
+ 
+ const nearby=e.events.filter(x=>{ 
+  const text=((x.title||"")+" "+(x.description||"")).toLowerCase(); 
+  return names.some(name=>text.includes(name)); 
+ }).slice(0,10); 
+ 
+ if(nearby.length){ 
+  events=nearby.map(x=>` 
+   <div class="event"> 
+    <b>${x.title}</b> 
+    <br> 
+    ${x.categories?.[0]?.title||"Natural event"} 
+   </div> 
+  `).join(""); 
+ } 
+}
 
  let nasa="NASA images unavailable.";
  if(n?.collection?.items?.length){
