@@ -36,10 +36,11 @@ async function search(){
    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&forecast_days=7&timezone=auto`
   ):null;
 
-  const nasa=API_KEY?safe(
-   "https://api.nasa.gov/planetary/apod?api_key="+
-   encodeURIComponent(API_KEY)
-  ):null;
+  const nasa=safe(
+   "https://images-api.nasa.gov/search?q="+
+   encodeURIComponent(q+" space")+
+   "&media_type=image"
+  );
 
   const events=API_KEY?safe(
    "https://eonet.gsfc.nasa.gov/api/v3/events?status=open"
@@ -117,15 +118,28 @@ function show(c,w,n,e,lat,lon){
 
  }
 
- let nasa="NASA data unavailable.";
- if(n?.url){
+ let nasa="NASA images unavailable.";
+ if(n?.collection?.items?.length){
   nasa=`
-   <img class="space-main" src="${n.url}">
-   <h3>${n.title}</h3>
-   <p>${n.explanation||""}</p>
-   <small>${n.date||""}</small>
+   <div class="space-gallery">
+    ${n.collection.items.slice(0,6).map(x=>{
+     const d=x.data?.[0];
+     const p=x.links?.find(l=>l.render==="image")?.href;
+     return p?`
+      <figure>
+       <img class="space-image" src="${p}" alt="${d?.title||"NASA Space Image"}">
+       <figcaption>
+        <b>${d?.title||"NASA Space Image"}</b>
+        <br>
+        ${d?.description?.slice(0,200)||""}
+       </figcaption>
+      </figure>
+     `:"";
+    }).join("")}
+   </div>
   `;
  }
+
  result.innerHTML=`
  <article>
   <header>
