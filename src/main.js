@@ -1,4 +1,5 @@
 const API_KEY=import.meta.env.VITE_NASA_API_KEY;
+const REST_API_KEY=import.meta.env.VITE_REST_COUNTRIES_API_KEY;
 
 const input=document.querySelector("#countryInput");
 const button=document.querySelector("#searchButton");
@@ -6,15 +7,26 @@ const result=document.querySelector("#result");
 
 button.onclick=search;
 input.onkeydown=e=>{if(e.key==="Enter")search()};
-async function get(url){
- const r=await fetch(url);
+
+async function get(url,options={}){
+ const r=await fetch(url,options);
  if(!r.ok)throw Error("HTTP "+r.status);
  return r.json();
 }
-async function safe(url){
- try{return await get(url)}
+async function safe(url,options={}){
+ try{return await get(url,options)}
  catch(e){console.log("Failed:",url,e);return null}
 }
+
+function getCountyTime(timezone){
+    const now=new Date();
+    return new Intl.DateTimeFormat("en-US",{
+        timeZone:"timezone",
+        dateStyle:"full",
+        timeStyle:"medium"
+    }).format(now);
+}
+
 async function search(){
  const q=input.value.trim();
  if(!q){
@@ -32,6 +44,20 @@ async function search(){
    throw Error("Country not found");
   const lat=wiki.coordinates?.lat||0;
   const lon=wiki.coordinates?.lon||0;
+
+  const countyData=await safe(
+    "https://api.restcountries.com/countries/v5?q="+
+    encodeURIComponent(q),{
+        Headers:{
+            "Authorization":"Bearer"+REST_API_KEY
+        }
+    }
+    );
+
+ 
+  const county=countyData?.data?.objects?.[0];
+  const timezone=county?.timezone?.[0]||"UTC";
+
   const weather=lat&&lon?safe(
    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&forecast_days=7&timezone=auto`
   ):null;
@@ -48,7 +74,8 @@ async function search(){
   const [w,n,e]=await Promise.all([
    weather,nasa,events
   ]);
-  show(wiki,w,n,e,lat,lon);
+
+  show(wiki,w,n,e,lat,lon,timezone);
  }catch(err){
   console.error(err);
   result.innerHTML=`
@@ -68,7 +95,7 @@ function distance(lat1,lon1,lat2,lon2){
  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-function show(c,w,n,e,lat,lon){
+function show(c,w,n,e,lat,lon,timezone){
  const image=c.thumbnail?.source||"";
  let weatherHTML="<p>Weather unavailable.</p>";
  if(w?.current){
@@ -220,6 +247,34 @@ if(lat&&lon){
    ${c.extract||"No country description available."}
   </p>
   <hr>
+
+ <hr> 
+  <h2>Local Time &date<h2>
+  <table>
+  <tr>
+  <th>local zone<th>
+  <td>${timezone}</td>
+  </tr>
+  <tr>
+     <td>${new Intl.DateTimeFormat("en-US",{
+        timeZone:timezone,
+        weekday:"long",
+        year:"numeric",
+        month:"long",
+        day:"numeric"
+     }).format(new Date())}</td>
+     </tr>
+     <tr>
+     <th>Local Time</th>
+     <tf>${new Intl.DateTimeFormat("en-US",{
+        timeZone:timezone,
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit"
+     }).format(new Date())}</td>
+     </tr>
+     </table>
+
   <h2>Nature & Geography</h2>
   <p>
    <b>Coordinates:</b>
