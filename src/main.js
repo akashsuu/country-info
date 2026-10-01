@@ -47,9 +47,10 @@ async function search(){
 
   const countyData=await safe(
     "https://api.restcountries.com/countries/v5?q="+
-    encodeURIComponent(q),{
+    encodeURIComponent(q),
+    {
         Headers:{
-            "Authorization":"Bearer"+REST_API_KEY
+        "Authorization":"Bearer"+REST_API_KEY
         }
     }
     );
@@ -95,7 +96,26 @@ function distance(lat1,lon1,lat2,lon2){
  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-function show(c,w,n,e,lat,lon,timezone){
+function showMap(lat,lon,name){
+    setTimeout(()=>{
+        const old=document.querySelector("#countryMap");
+        if(!old||typeof L==="undefined")return;
+
+        const map=L.map("countryMap").setView([lat,lon],5);
+
+        L.tileLayer("'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+            attribution:"$copy; openstreetMap contributors"
+        }).addto(map);
+
+        L.marker([lat,lon])
+        .addTo(map)
+        .bindPopup("<b>"+name+"</b>")
+        .openPopup();
+    },100);
+}
+
+
+function show(c,w,n,e,lat,lon,timezone,countryTime){
  const image=c.thumbnail?.source||"";
  let weatherHTML="<p>Weather unavailable.</p>";
  if(w?.current){
@@ -281,11 +301,18 @@ if(lat&&lon){
    ${lat||"Unavailable"},
    ${lon||"Unavailable"}
   </p>
+  <h3>county Map</h3>
+  <div id="countryMap" class="county-map"></div>
   <p>
    Detailed geographical information is
    provided by the country article.
   </p>
   <hr>
+
+
+
+ 
+
   <h2>Climate & Weather</h2>
   ${weatherHTML}
   <h3>7 Day Forecast</h3>
@@ -315,4 +342,7 @@ if(lat&&lon){
   ${nasa}
  </article>
  `;
-}
+
+ showMap(lat,lon,c.title);
+ }
+
